@@ -1,6 +1,6 @@
-# mdbook
+# mdBook
 
-A [Docker](http://docker.com) file to build [mdbook](https://github.com/mdbook).
+A [Docker](http://docker.com) file to build [mdBook](https://github.com/mdbook) a utility to create modern online books from Markdown files.
 
 > Be aware! You should read carefully the usage documentation of every tool!
 
@@ -17,7 +17,7 @@ A [Docker](http://docker.com) file to build [mdbook](https://github.com/mdbook).
 ## Compatible Architectures
 
 This image has been builded using [buildx](https://docs.docker.com/buildx/working-with-buildx/) for this architectures: 
-- amd64 arm64 ppc64le s390x 386 arm/v7 arm/v6
+- amd64 arm64 arm/v7
 
 ## Usage Example
 

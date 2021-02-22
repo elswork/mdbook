@@ -1,8 +1,12 @@
 SNAME ?= mdbook
 RNAME ?= elswork/$(SNAME)
 VER ?= `cat VERSION`
-BASENAME ?= alpine:latest
+BASENAME ?= rust:1.41.0
 PARAM ?= someparameter
+TARGET_PLATFORM ?= linux/amd64,linux/arm64,linux/arm/v7
+NO_CACHE ?= 
+# NO_CACHE ?= --no-cache
+# linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6
 
 # HELP
 # This will output the help for each task
@@ -24,7 +28,7 @@ debug: ## Debug the container
 	--build-arg VERSION=$(VER) .
 build: ## Build the container
 	mkdir -p builds
-	docker build --no-cache -t $(RNAME):$(VER) \
+	docker build $(NO_CACHE) -t $(RNAME):$(VER) -t $(RNAME):latest \
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	--build-arg VCS_REF=`git rev-parse --short HEAD` \
 	--build-arg BASEIMAGE=$(BASENAME) \
@@ -34,13 +38,14 @@ build: ## Build the container
 	docker buildx inspect --bootstrap
 debugx: ## Buildx in Debug mode
 	docker buildx build \
-	-t $(RNAME):debug --pull --load \
+	--platform ${TARGET_PLATFORM} \
+	-t $(RNAME):debug --pull \
 	--build-arg BASEIMAGE=$(BASENAME) \
 	--build-arg VERSION=$(VER) .
 buildx: ## Buildx the container
-	docker buildx build --no-cache \
-	--platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6 \
-  	-t $(RNAME):latest -t $(RNAME):$(VER) --pull --push \
+	docker buildx build $(NO_CACHE) \
+	--platform ${TARGET_PLATFORM} \
+	-t $(RNAME):$(VER) -t $(RNAME):latest --pull --push \
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	--build-arg VCS_REF=`git rev-parse --short HEAD` \
 	--build-arg BASEIMAGE=$(BASENAME) \
@@ -51,6 +56,6 @@ buildx: ## Buildx the container
 console: ## Start console in container
 	docker run -it --rm --entrypoint "/bin/ash" $(RNAME):$(VER)
 debugconsole: ## Start a debug console in container
-	docker run -it --rm --entrypoint "/bin/ash" $(RNAME):debug
+	docker run -it --rm --entrypoint "mdbook" $(RNAME):debug
 start: ## Start an container command
 	docker run --rm $(RNAME):$(VER) $(PARAM)

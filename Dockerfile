@@ -1,5 +1,12 @@
-ARG BASEIMAGE=alpine:latest
-FROM ${BASEIMAGE}
+ARG BASEIMAGE=rust:1
+FROM ${BASEIMAGE} as build-env
+WORKDIR /app
+RUN cargo install mdbook --verbose
+
+#RUN apk add --no-cache rust cargo && \
+#    cargo install mdbook
+
+FROM gcr.io/distroless/cc
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -15,8 +22,11 @@ LABEL mantainer="Eloy Lopez <elswork@gmail.com>" \
     org.label-schema.version=$VERSION \
     org.label-schema.schema-version="1.0"
 
-RUN apk add --no-cache rust cargo musl-dev && \
-    # rustup target add "${ARC}" && \
-    cargo install mdbook
-WORKDIR /data
-ENTRYPOINT ["/usr/bin/mdbook"]
+COPY --from=build-env /usr/local/cargo/bin/mdbook* /bin/
+CMD ["/bin/mdbook"]
+
+#SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+#COPY --from=builder /root/.cargo/bin/mdbook /usr/bin/mdbook
+
+#WORKDIR /data
+#ENTRYPOINT [ "/usr/bin/mdbook" ]
